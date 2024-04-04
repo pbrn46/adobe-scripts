@@ -1,3 +1,5 @@
+// Swap two objects position and size in Illustrator
+
 try {
   var selObjs = "Please select two objects on the page.";
   var docRef = activeDocument;

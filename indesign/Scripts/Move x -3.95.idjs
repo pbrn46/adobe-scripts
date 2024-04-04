@@ -11,17 +11,6 @@ function alert(msg) {
     theDialog.destroy();
     return;
 }
-// s.move([-.25, -.25])
-
-// alert(Object.keys(s).join(" "))
-// const k = [];
-// for (let key of s) {
-//   k.push(k);
-// }
-// // alert(Object.keys)
-
-
-// alert(k);
 
 function main() {
   const s = app.selection[0];
