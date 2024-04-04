@@ -1,0 +1,71 @@
+// Conversion of ChangePDFPage.jsx to .idjs
+
+// This script changes the page number of placed PDF files in InDesign.
+// It prompts the user to enter a new page number and then replaces all selected placed PDF files with the new page number.
+
+// Load the InDesign application object
+let myInDesign = require("indesign");
+let app = myInDesign.app;
+
+try {
+  main();
+} catch (error) {
+  alert(error);
+}
+
+function main() {
+  // Make certain that user interaction (display of dialogs, etc.) is turned on.
+  app.scriptPreferences.userInteractionLevel = myInDesign.UserInteractionLevels.interactWithAll;
+
+  // Check if a rectangle containing a placed PDF file is selected
+  const selection = app.selection[0];
+  if (!selection) {
+    alert("No selection found.");
+    return;
+  }
+
+  if (selection.constructor.name !== "Rectangle") {
+    alert("Selected item is not a rectangle.");
+    return;
+  }
+
+  // rectangle and frame are the same thing
+  const rectangle = selection;
+
+  // Check if the rectangle contains a placed PDF file
+  const graphic = rectangle.graphics.item(0)
+
+  // Get the file path of the placed PDF file
+  // const filePath = graphic.itemLink.filePath;
+
+  // Get the current page number of the PDF file
+  const link = graphic.itemLink;
+  const pdf = link.parent;
+  const pageNumber = pdf.pdfAttributes.pageNumber;
+
+  // Prompt the user to enter a new page number
+  var chosenPage = parseInt(prompt("Choose Page Number:", pageNumber.toString()));
+  if (isNaN(chosenPage)) {
+    alert("Invalid page number");
+    return;
+  }
+
+  // Set the new page number in the PDF place preferences
+  app.importedPageAttributes.pageNumber = chosenPage;
+  // app.pdfPlacePreferences.pageNumber = chosenPage; // This doesn't work
+
+  const rectangles = app.selection.filter(item => item.constructor.name === "Rectangle");
+
+  // Replace the selected PDF files with the new page number
+  rectangles.forEach(rectangle => {
+    changeRectanglePageNumber(rectangle, chosenPage);
+  })
+
+}
+
+function changeRectanglePageNumber(rectangle, newPageNumber) {
+  const graphic = rectangle.graphics.item(0);
+  const filePath = graphic.itemLink.filePath;
+  app.importedPageAttributes.pageNumber = newPageNumber;
+  graphic.place(filePath, false);
+}

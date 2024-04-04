@@ -1,0 +1,38 @@
+// Align and copy coupons on the same page.
+// The first coupon is selected and the script will duplicate it 9 times and align them on the page.
+// The first coupon is placed at the top left corner of the page and the rest are aligned to the right and below the first coupon.
+
+let myInDesign = require("indesign");
+let app = myInDesign.app;
+
+try {
+  main();
+}
+catch (error) {
+  alert(error);
+}
+
+function alert(msg) {
+  theDialog = app.dialogs.add();
+  col = theDialog.dialogColumns.add();
+  colText = col.staticTexts.add();
+  colText.staticLabel = "" + msg;
+  theDialog.canCancel = false;
+  theDialog.show();
+  theDialog.destroy();
+  return;
+}
+function main() {
+  const h = 2
+  const w = 3.75
+  const mx = 0.5
+  const my = 0.5
+  const s = app.selection[0]
+  s.move([mx, my])
+  for (let i = 1; i < 10; i++) {
+    const newObj = s.duplicate()
+    const x = ((i % 2) * w) + mx
+    const y = (Math.floor(i / 2) * h) + my
+    newObj.move([x, y])
+  }
+}

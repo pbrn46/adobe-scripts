@@ -1,0 +1,109 @@
+﻿//ExportAllStories.idjs
+//An InDesign UXPScript
+//18.0.0  October 2022
+
+//Exports all stories in an InDesign document in a specified text format.
+//
+//For more on InDesign/InCopy scripting see the documentation included in the Scripting SDK 
+//available at http://www.adobe.com/go/id_uxp_scripting 
+//or visit the InDesign Scripting User to User forum at http://www.adobeforums.com
+//
+
+let myInDesign = require("indesign");
+let app = myInDesign.app;
+
+try 
+{
+    await main();
+} 
+catch (error)
+{
+    alert(error);
+}
+
+function alert(msg) {
+    theDialog = app.dialogs.add();
+	col = theDialog.dialogColumns.add();
+	colText = col.staticTexts.add();
+	colText.staticLabel = "" + msg;
+	theDialog.canCancel = false;
+	theDialog.show();
+	theDialog.destroy();
+	return;
+}
+
+async function main(){
+	//Make certain that user interaction (display of dialogs, etc.) is turned on.
+	app.scriptPreferences.userInteractionLevel = myInDesign.UserInteractionLevels.interactWithAll;
+	if(app.documents.length != 0){
+		if (app.activeDocument.stories.length != 0){
+			await myDisplayDialog();
+		}
+		else{
+			alert("The document does not contain any text. Please open a document containing text and try again.");
+		}
+	}
+	else{
+		alert("No documents are open. Please open a document and try again.");
+	}
+}
+
+async function myDisplayDialog(){
+	with(myDialog = app.dialogs.add({name:"ExportAllStories"})){
+		//Add a dialog column.
+		myDialogColumn = dialogColumns.add()	
+		with(myDialogColumn){
+			with(borderPanels.add()){
+				staticTexts.add({staticLabel:"Export as:"});
+				with(myExportFormatButtons = radiobuttonGroups.add()){
+					radiobuttonControls.add({staticLabel:"Text Only", checkedState:true});
+					radiobuttonControls.add({staticLabel:"RTF"});
+					radiobuttonControls.add({staticLabel:"InDesign Tagged Text"});
+				}
+			}
+		}
+		myReturn = myDialog.show();
+		if (myReturn == true){
+			//Get the values from the dialog box.
+			myExportFormat = myExportFormatButtons.selectedButton;
+			myDialog.destroy;
+			const fs = require("uxp").storage.localFileSystem;
+			let myFolder =  await fs.getFolder();
+			if(myFolder && myFolder.nativePath){
+				myExportAllStories(myExportFormat, myFolder.nativePath);
+			}
+		}
+		else{
+			myDialog.destroy();
+		}
+	}
+}
+
+//myExportStories function takes care of exporting the stories.
+//myExportFormat is a number from 0-2, where 0 = text only, 1 = rtf, and 3 = tagged text.
+//myFolder is a reference to the folder in which you want to save your files.
+function myExportAllStories(myExportFormat, myFolder){
+	for(myCounter = 0; myCounter < app.activeDocument.stories.length; myCounter++){
+		myStory = app.activeDocument.stories.item(myCounter);
+		myID = myStory.id;
+		switch(myExportFormat){
+			case 0:
+				myFormat = myInDesign.ExportFormat.textType;
+				myExtension = ".txt"
+				break;
+			case 1:
+				myFormat = myInDesign.ExportFormat.RTF;
+				myExtension = ".rtf"
+				break;
+			case 2:
+				myFormat = myInDesign.ExportFormat.taggedText;
+				myExtension = ".txt"
+				break;
+		}
+		myFileName = "StoryID" + myID + myExtension;
+		myFilePath = myFolder + "/" + myFileName;
+		const fs = require('fs');
+		fs.writeFile(myFilePath, myStory);
+		myStory.exportFile(myFormat, myFilePath);
+	}
+}

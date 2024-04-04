@@ -1,0 +1,35 @@
+let myInDesign = require("indesign");
+let app = myInDesign.app;
+
+function alert(msg) {
+    theDialog = app.dialogs.add();
+    col = theDialog.dialogColumns.add();
+    colText = col.staticTexts.add();
+    colText.staticLabel = "" + msg;
+	theDialog.canCancel = false;
+    theDialog.show();
+    theDialog.destroy();
+    return;
+}
+// s.move([-.25, -.25])
+
+// alert(Object.keys(s).join(" "))
+// const k = [];
+// for (let key of s) {
+//   k.push(k);
+// }
+// // alert(Object.keys)
+
+
+// alert(k);
+
+function main() {
+  const s = app.selection[0];
+  if (app.selection.length === 0) return
+  alert(Object.keys(s))
+  console.log(Object.keys(s).join("\n"))
+  s.move([x, y])
+}
+
+
+main()
